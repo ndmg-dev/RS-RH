@@ -1,0 +1,9 @@
+spring:
+  data:
+    mongodb:
+      auto-index-creation: true
+
+logging:
+  level:
+    com.mgca: DEBUG
+    org.springframework.data.mongodb: DEBUG

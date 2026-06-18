@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: mgca-social-network
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/mgca_social_network}
+      auto-index-creation: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+jwt:
+  secret: ${JWT_SECRET:change-me-in-production-use-at-least-256-bit-key-here-please}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}

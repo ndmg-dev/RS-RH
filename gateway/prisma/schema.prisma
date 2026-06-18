@@ -1,0 +1,97 @@
+// ─── Prisma Schema ─ MGCA Social Network ──────────────────────────────
+// This schema is a READ-ONLY mirror of the Java/Spring Boot MongoDB
+// collections. All writes go through the Spring Boot API.
+// ────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users ─────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  passwordHash String   @map("passwordHash")
+  fullName     String
+  role         String
+  jobTitle     String?
+  department   String?
+  bio          String?
+  avatarUrl    String?
+  skills       String[]
+  location     String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+// ─── Posts ──────────────────────────────────────────────────────────────
+
+model Post {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  authorId         String   @db.ObjectId
+  content          String
+  mediaUrls        String[]
+  visibility       String   @default("PUBLIC")
+  likeCount        Int      @default(0)
+  commentCount     Int      @default(0)
+  deleted          Boolean  @default(false)
+  moderationStatus String   @default("APPROVED")
+  moderatedBy      String?  @db.ObjectId
+  moderationNote   String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("posts")
+}
+
+// ─── Comments ──────────────────────────────────────────────────────────
+
+model Comment {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId           String   @db.ObjectId
+  authorId         String   @db.ObjectId
+  content          String
+  deleted          Boolean  @default(false)
+  moderationStatus String   @default("APPROVED")
+  moderatedBy      String?  @db.ObjectId
+  moderationNote   String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("comments")
+}
+
+// ─── Likes ─────────────────────────────────────────────────────────────
+
+model Like {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @db.ObjectId
+  userId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@map("likes")
+}
+
+// ─── Audit Logs ────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  actorId    String   @db.ObjectId
+  action     String
+  targetType String
+  targetId   String   @db.ObjectId
+  details    String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
