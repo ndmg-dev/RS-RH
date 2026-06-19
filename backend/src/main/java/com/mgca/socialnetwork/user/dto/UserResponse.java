@@ -21,6 +21,7 @@ public class UserResponse {
     private String avatarUrl;
     private List<String> skills;
     private String location;
+    private String customSections;
     private Instant createdAt;
 
     /**
@@ -38,6 +39,7 @@ public class UserResponse {
                 .avatarUrl(user.getAvatarUrl())
                 .skills(user.getSkills())
                 .location(user.getLocation())
+                .customSections(user.getCustomSections())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

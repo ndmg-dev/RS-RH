@@ -1,22 +1,28 @@
 import { mockUsers } from "./users.mock";
 import { mockPosts } from "./posts.mock";
 import { mockComments } from "./comments.mock";
-import { UserProfile, Post, Comment } from "../types";
+import { mockAnnouncements } from "./announcements.mock";
+import { UserProfile, Post, Comment, Announcement } from "../types";
 
 const MOCK_USERS_KEY = "mgca_mock_users";
 const MOCK_POSTS_KEY = "mgca_mock_posts";
 const MOCK_COMMENTS_KEY = "mgca_mock_comments";
+const MOCK_ANNOUNCEMENTS_KEY = "mgca_mock_announcements";
 
 export const mockDb = {
   init() {
     if (!localStorage.getItem(MOCK_USERS_KEY)) {
       localStorage.setItem(MOCK_USERS_KEY, JSON.stringify(mockUsers));
     }
-    if (!localStorage.getItem(MOCK_POSTS_KEY)) {
+    const postsInStorage = localStorage.getItem(MOCK_POSTS_KEY);
+    if (!postsInStorage || !postsInStorage.includes("mediaUrls")) {
       localStorage.setItem(MOCK_POSTS_KEY, JSON.stringify(mockPosts));
     }
     if (!localStorage.getItem(MOCK_COMMENTS_KEY)) {
       localStorage.setItem(MOCK_COMMENTS_KEY, JSON.stringify(mockComments));
+    }
+    if (!localStorage.getItem(MOCK_ANNOUNCEMENTS_KEY)) {
+      localStorage.setItem(MOCK_ANNOUNCEMENTS_KEY, JSON.stringify(mockAnnouncements));
     }
   },
 
@@ -106,5 +112,26 @@ export const mockDb = {
         this.savePost(post);
       }
     }
+  },
+
+  getAnnouncements(): Announcement[] {
+    this.init();
+    return JSON.parse(localStorage.getItem(MOCK_ANNOUNCEMENTS_KEY) || "[]");
+  },
+
+  saveAnnouncement(announcement: Announcement): void {
+    const announcements = this.getAnnouncements();
+    const index = announcements.findIndex(a => a.id === announcement.id);
+    if (index > -1) {
+      announcements[index] = announcement;
+    } else {
+      announcements.unshift(announcement); // new announcements at the top
+    }
+    localStorage.setItem(MOCK_ANNOUNCEMENTS_KEY, JSON.stringify(announcements));
+  },
+
+  deleteAnnouncement(id: string): void {
+    const announcements = this.getAnnouncements().filter(a => a.id !== id);
+    localStorage.setItem(MOCK_ANNOUNCEMENTS_KEY, JSON.stringify(announcements));
   }
 };

@@ -58,6 +58,8 @@ public class User {
 
     private String location;
 
+    private String customSections;
+
     @Indexed
     @Builder.Default
     private boolean active = true;

@@ -14,4 +14,5 @@ public class UpdateProfileRequest {
     private String avatarUrl;
     private List<String> skills;
     private String location;
+    private String customSections;
 }

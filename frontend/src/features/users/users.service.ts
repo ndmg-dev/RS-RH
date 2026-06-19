@@ -58,7 +58,8 @@ export const usersService = {
             jobTitle: updatedProfile.jobTitle,
             department: updatedProfile.department,
             avatarUrl: updatedProfile.avatarUrl,
-            theme: updatedProfile.theme
+            theme: updatedProfile.theme,
+            customSections: updatedProfile.customSections
           });
         }
       }
@@ -77,7 +78,8 @@ export const usersService = {
             jobTitle: response.data.jobTitle,
             department: response.data.department,
             avatarUrl: response.data.avatarUrl,
-            theme: response.data.theme
+            theme: response.data.theme,
+            customSections: response.data.customSections
           });
         }
       }

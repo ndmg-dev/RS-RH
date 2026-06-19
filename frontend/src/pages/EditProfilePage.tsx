@@ -16,6 +16,7 @@ const profileSchema = z.object({
   bio: z.string().max(500, { message: "A biografia pode ter no máximo 500 caracteres." }).optional(),
   avatarUrl: z.string().refine(val => {
     if (!val) return true;
+    if (val.startsWith("data:image/")) return true;
     try {
       new URL(val);
       return true;
@@ -34,12 +35,14 @@ export const EditProfilePage: React.FC = () => {
   const { refreshUser } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isReadingAvatar, setIsReadingAvatar] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -54,6 +57,39 @@ export const EditProfilePage: React.FC = () => {
       theme: "LIGHT",
     }
   });
+
+  const watchAvatarUrl = watch("avatarUrl");
+  const watchFullName = watch("fullName");
+
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    if (!file.type.startsWith("image/")) {
+      setError("Apenas arquivos de imagem são permitidos.");
+      return;
+    }
+
+    setIsReadingAvatar(true);
+    setError(null);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setValue("avatarUrl", event.target.result as string, { shouldValidate: true, shouldDirty: true });
+      } else {
+        setError("Erro ao ler imagem.");
+      }
+      setIsReadingAvatar(false);
+    };
+    reader.onerror = () => {
+      setError("Erro ao carregar o arquivo.");
+      setIsReadingAvatar(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
   const loadProfile = useCallback(async () => {
     setIsLoading(true);
@@ -157,6 +193,53 @@ export const EditProfilePage: React.FC = () => {
               </div>
             )}
 
+            {/* Avatar Upload Widget */}
+            <div className="flex flex-col items-center sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800/60 transition-colors duration-300">
+              <div className="relative group">
+                {watchAvatarUrl ? (
+                  <img
+                    src={watchAvatarUrl}
+                    alt="Visualização do avatar"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-md bg-slate-100 dark:bg-slate-800"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-md flex items-center justify-center font-bold text-slate-400 dark:text-slate-500 text-lg">
+                    {watchFullName ? watchFullName.substring(0, 2).toUpperCase() : "U"}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col items-center sm:items-start space-y-1">
+                <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">Foto do Perfil</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 mb-2">Selecione uma imagem ou insira a URL abaixo.</span>
+                <div className="flex items-center space-x-2">
+                  <label className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-full transition-colors cursor-pointer flex items-center space-x-1.5 shadow-sm">
+                    {isReadingAvatar ? (
+                      <Loader2 size={12} className="animate-spin text-white" />
+                    ) : (
+                      <Image size={12} />
+                    )}
+                    <span>Alterar Foto</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarFileChange}
+                      className="hidden"
+                      disabled={isReadingAvatar}
+                    />
+                  </label>
+                  {watchAvatarUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setValue("avatarUrl", "")}
+                      className="px-3 py-1.5 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-full transition-colors cursor-pointer"
+                    >
+                      Remover
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Grid Form */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Full Name */}
@@ -217,22 +300,8 @@ export const EditProfilePage: React.FC = () => {
                 />
               </div>
 
-              {/* Avatar URL */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center space-x-1.5">
-                  <Image size={14} className="text-slate-400 dark:text-slate-500" />
-                  <span>URL do Avatar (Foto)</span>
-                </label>
-                <input
-                  type="text"
-                  {...register("avatarUrl")}
-                  placeholder="Ex: https://images.unsplash.com/..."
-                  className="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                {errors.avatarUrl && (
-                  <p className="mt-1 text-xs text-red-500 dark:text-red-400 font-medium">{errors.avatarUrl.message}</p>
-                )}
-              </div>
+              {/* Hidden Input for Avatar URL */}
+              <input type="hidden" {...register("avatarUrl")} />
 
               {/* Bio */}
               <div className="md:col-span-2">

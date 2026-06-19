@@ -40,6 +40,14 @@ public class UserController {
         return ResponseEntity.ok(userService.updateProfile(getCurrentUserId(), request));
     }
 
+    @PatchMapping("/{id}")
+    @Operation(summary = "Update a user's profile by ID (e.g. for recommendations)")
+    public ResponseEntity<UserResponse> updateProfileById(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateProfileRequest request) {
+        return ResponseEntity.ok(userService.updateProfile(id, request));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get a user by ID")
     public ResponseEntity<UserResponse> getUserById(@PathVariable String id) {

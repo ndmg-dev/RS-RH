@@ -53,6 +53,9 @@ public class UserService {
         if (request.getLocation() != null) {
             user.setLocation(request.getLocation().trim());
         }
+        if (request.getCustomSections() != null) {
+            user.setCustomSections(request.getCustomSections());
+        }
 
         user.setUpdatedAt(Instant.now());
         user = userRepository.save(user);

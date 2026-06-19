@@ -6,9 +6,10 @@ import { MapPin, User, Edit3, Briefcase } from "lucide-react";
 interface ProfileHeaderProps {
   profile: UserProfile;
   currentUser: AuthUser | null;
+  onAddSectionClick?: () => void;
 }
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, currentUser }) => {
+export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, currentUser, onAddSectionClick }) => {
   const isOwnProfile = currentUser?.id === profile.id;
 
   return (
@@ -34,15 +35,23 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, currentUs
             )}
           </div>
 
-          {/* Edit Profile button */}
+          {/* Action buttons */}
           {isOwnProfile && (
-            <Link
-              to="/profile/me/edit"
-              className="mt-4 sm:mt-0 flex items-center space-x-2 px-4 py-2 border border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 font-bold rounded-full text-sm transition-colors shadow-sm self-stretch sm:self-auto text-center justify-center"
-            >
-              <Edit3 size={16} />
-              <span>Editar perfil</span>
-            </Link>
+            <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 self-stretch sm:self-auto">
+              <button
+                onClick={onAddSectionClick}
+                className="flex items-center space-x-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full text-sm transition-colors shadow-sm justify-center cursor-pointer"
+              >
+                <span>Adicionar seção</span>
+              </button>
+              <Link
+                to="/profile/me/edit"
+                className="flex items-center space-x-2 px-4 py-2 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-full text-sm transition-colors shadow-sm justify-center"
+              >
+                <Edit3 size={16} />
+                <span>Editar perfil</span>
+              </Link>
+            </div>
           )}
         </div>
 
