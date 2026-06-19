@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createProxyMiddleware, Options } from 'http-proxy-middleware';
+import { createProxyMiddleware, Options, fixRequestBody } from 'http-proxy-middleware';
 import { config } from '../config';
 import { authForwarder } from '../middleware/auth';
 import { generalLimiter, authLimiter } from '../middleware/rateLimiter';
@@ -43,11 +43,12 @@ const proxyOptions: Options = {
         }));
       }
     },
-    proxyReq: (proxyReq, req) => {
+    proxyReq: (proxyReq, req, res) => {
+      // Fix request body if it was parsed by express.json()
+      fixRequestBody(proxyReq, req);
+      
       // Log proxied requests in development
-      if (config.nodeEnv !== 'production') {
-        console.log(`[PROXY] ${req.method} ${req.url} → ${config.springBootUrl}${req.url}`);
-      }
+      console.log(`[PROXY] ${req.method} ${req.url} → ${config.springBootUrl}${req.url} | headers:`, proxyReq.getHeaders());
     },
   },
 };
@@ -56,7 +57,13 @@ const proxyOptions: Options = {
 router.use(
   '/api/v1/auth',
   authLimiter,
-  createProxyMiddleware(proxyOptions)
+  createProxyMiddleware({
+    ...proxyOptions,
+    pathRewrite: (path, req) => {
+      // Put the prefix back since express router stripped it
+      return `/api/v1/auth${req.url}`;
+    }
+  })
 );
 
 // ─── All other API endpoints ───────────────────────────────────────────
@@ -64,7 +71,13 @@ router.use(
   '/api/v1',
   generalLimiter,
   authForwarder,
-  createProxyMiddleware(proxyOptions)
+  createProxyMiddleware({
+    ...proxyOptions,
+    pathRewrite: (path, req) => {
+      // Put the prefix back since express router stripped it
+      return `/api/v1${req.url}`;
+    }
+  })
 );
 
 export default router;
