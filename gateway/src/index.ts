@@ -37,11 +37,14 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use((req: Request, _res: Response, next: NextFunction) => {
   const start = Date.now();
   const { method, originalUrl } = req;
+  
+  console.log(`[DEBUG] Incoming request: ${method} ${originalUrl} Headers:`, req.headers);
 
   // Log after response is sent
   _res.on('finish', () => {
     const duration = Date.now() - start;
     const status = _res.statusCode;
+    console.log(`[DEBUG] Outgoing response: ${status} in ${duration}ms`);
     const color = status >= 500 ? '\x1b[31m'   // red
                 : status >= 400 ? '\x1b[33m'   // yellow
                 : status >= 300 ? '\x1b[36m'   // cyan
