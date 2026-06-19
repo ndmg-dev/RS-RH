@@ -3,6 +3,8 @@ package com.mgca.socialnetwork.security;
 import com.mgca.socialnetwork.common.Role;
 import com.mgca.socialnetwork.common.exception.DuplicateResourceException;
 import com.mgca.socialnetwork.common.exception.ResourceNotFoundException;
+import com.mgca.socialnetwork.common.exception.BadRequestException;
+import com.mgca.socialnetwork.common.exception.ForbiddenException;
 import com.mgca.socialnetwork.security.dto.AuthResponse;
 import com.mgca.socialnetwork.security.dto.LoginRequest;
 import com.mgca.socialnetwork.security.dto.RegisterRequest;
@@ -31,15 +33,21 @@ public class AuthService {
      * persists the user, and returns a JWT-backed response.
      */
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        String email = request.getEmail().toLowerCase().trim();
+        if (!email.endsWith("@mendoncagalvao.com.br")) {
+            throw new BadRequestException("Only @mendoncagalvao.com.br emails are allowed");
+        }
+        if (userRepository.existsByEmail(email)) {
             throw new DuplicateResourceException(
-                    "An account with email '" + request.getEmail() + "' already exists");
+                    "An account with email '" + email + "' already exists");
         }
 
         User user = User.builder()
-                .email(request.getEmail().toLowerCase().trim())
+                .email(email)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName().trim())
+                .jobTitle(request.getJobTitle())
+                .department(request.getDepartment())
                 .role(Role.USER)
                 .active(true)
                 .skills(new ArrayList<>())
@@ -54,11 +62,7 @@ public class AuthService {
 
         return AuthResponse.builder()
                 .token(token)
-                .type("Bearer")
-                .userId(user.getId())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .role(user.getRole().name())
+                .user(mapToAuthUserDto(user))
                 .build();
     }
 
@@ -67,10 +71,13 @@ public class AuthService {
      * then issues a JWT token.
      */
     public AuthResponse login(LoginRequest request) {
+        String email = request.getEmail().toLowerCase().trim();
+        if (!email.endsWith("@mendoncagalvao.com.br")) {
+            throw new ForbiddenException("Only @mendoncagalvao.com.br emails are allowed");
+        }
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail().toLowerCase().trim(),
-                        request.getPassword()));
+                new UsernamePasswordAuthenticationToken(email, request.getPassword()));
 
         User user = userRepository.findByEmail(request.getEmail().toLowerCase().trim())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.getEmail()));
@@ -80,11 +87,26 @@ public class AuthService {
 
         return AuthResponse.builder()
                 .token(token)
-                .type("Bearer")
-                .userId(user.getId())
-                .email(user.getEmail())
+                .user(mapToAuthUserDto(user))
+                .build();
+    }
+
+    public AuthResponse.AuthUserDto getMe(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        return mapToAuthUserDto(user);
+    }
+
+    private AuthResponse.AuthUserDto mapToAuthUserDto(User user) {
+        return AuthResponse.AuthUserDto.builder()
+                .id(user.getId())
                 .fullName(user.getFullName())
+                .email(user.getEmail())
                 .role(user.getRole().name())
+                .jobTitle(user.getJobTitle())
+                .department(user.getDepartment())
+                .avatarUrl(user.getAvatarUrl())
+                .theme(user.getTheme())
                 .build();
     }
 }

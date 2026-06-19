@@ -4,6 +4,7 @@ import com.mgca.socialnetwork.admin.dto.AdminUserUpdateRequest;
 import com.mgca.socialnetwork.admin.dto.ModerationRequest;
 import com.mgca.socialnetwork.comment.dto.CommentResponse;
 import com.mgca.socialnetwork.common.dto.PageResponse;
+import java.util.List;
 import com.mgca.socialnetwork.post.dto.PostResponse;
 import com.mgca.socialnetwork.security.UserPrincipal;
 import com.mgca.socialnetwork.user.dto.UserResponse;
@@ -61,13 +62,8 @@ public class AdminController {
 
     @GetMapping("/posts")
     @Operation(summary = "List all posts for moderation review")
-    public ResponseEntity<PageResponse<PostResponse>> getAllPosts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-
-        PageRequest pageRequest = PageRequest.of(page, Math.min(size, 50),
-                Sort.by(Sort.Direction.DESC, "createdAt"));
-        return ResponseEntity.ok(adminService.getAllPosts(pageRequest));
+    public ResponseEntity<List<PostResponse>> getAllPosts() {
+        return ResponseEntity.ok(adminService.getAllPosts());
     }
 
     @PatchMapping("/posts/{id}/moderation")
@@ -82,13 +78,8 @@ public class AdminController {
 
     @GetMapping("/comments")
     @Operation(summary = "List all comments for moderation review")
-    public ResponseEntity<PageResponse<CommentResponse>> getAllComments(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-
-        PageRequest pageRequest = PageRequest.of(page, Math.min(size, 50),
-                Sort.by(Sort.Direction.DESC, "createdAt"));
-        return ResponseEntity.ok(adminService.getAllComments(pageRequest));
+    public ResponseEntity<List<CommentResponse>> getAllComments() {
+        return ResponseEntity.ok(adminService.getAllComments());
     }
 
     @PatchMapping("/comments/{id}/moderation")

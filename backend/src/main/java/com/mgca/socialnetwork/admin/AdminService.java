@@ -2,8 +2,10 @@ package com.mgca.socialnetwork.admin;
 
 import com.mgca.socialnetwork.admin.dto.AdminUserUpdateRequest;
 import com.mgca.socialnetwork.admin.dto.ModerationRequest;
-import com.mgca.socialnetwork.comment.Comment;
 import com.mgca.socialnetwork.comment.CommentRepository;
+import com.mgca.socialnetwork.comment.dto.CommentResponse;
+import com.mgca.socialnetwork.common.dto.AuthorSummary;
+import com.mgca.socialnetwork.common.ModerationStatus;
 import com.mgca.socialnetwork.comment.dto.CommentResponse;
 import com.mgca.socialnetwork.common.dto.PageResponse;
 import com.mgca.socialnetwork.common.exception.ResourceNotFoundException;
@@ -19,6 +21,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
+import com.mgca.socialnetwork.common.Visibility;
+import com.mgca.socialnetwork.comment.Comment;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +40,8 @@ public class AdminService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        post.setModerationStatus(request.getStatus());
+        ModerationStatus modStatus = "HIDDEN".equalsIgnoreCase(request.getStatus()) ? ModerationStatus.REMOVED : ModerationStatus.APPROVED;
+        post.setModerationStatus(modStatus);
         post.setModeratedBy(moderatorId);
         post.setModerationNote(request.getNote());
         post.setUpdatedAt(Instant.now());
@@ -45,7 +51,7 @@ public class AdminService {
                 "Status: " + request.getStatus() + (request.getNote() != null ? " — " + request.getNote() : ""));
 
         User author = userRepository.findById(post.getAuthorId()).orElse(null);
-        return PostResponse.from(post, author, false);
+        return mapToPostResponse(post, author, false);
     }
 
     // ── Comment Moderation ──────────────────────────────────────────────────────
@@ -54,7 +60,8 @@ public class AdminService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", commentId));
 
-        comment.setModerationStatus(request.getStatus());
+        ModerationStatus modStatus = "HIDDEN".equalsIgnoreCase(request.getStatus()) ? ModerationStatus.REMOVED : ModerationStatus.APPROVED;
+        comment.setModerationStatus(modStatus);
         comment.setModeratedBy(moderatorId);
         comment.setModerationNote(request.getNote());
         comment.setUpdatedAt(Instant.now());
@@ -64,7 +71,7 @@ public class AdminService {
                 "Status: " + request.getStatus() + (request.getNote() != null ? " — " + request.getNote() : ""));
 
         User author = userRepository.findById(comment.getAuthorId()).orElse(null);
-        return CommentResponse.from(comment, author);
+        return mapToCommentResponse(comment, author);
     }
 
     // ── User Management ─────────────────────────────────────────────────────────
@@ -94,27 +101,94 @@ public class AdminService {
 
     // ── Listing (for moderation panels) ─────────────────────────────────────────
 
-    public PageResponse<PostResponse> getAllPosts(Pageable pageable) {
-        Page<Post> postPage = postRepository.findAll(pageable);
-        Page<PostResponse> responsePage = postPage.map(post -> {
+    public List<PostResponse> getAllPosts() {
+        return postRepository.findAll().stream().map(post -> {
             User author = userRepository.findById(post.getAuthorId()).orElse(null);
-            return PostResponse.from(post, author, false);
-        });
-        return PageResponse.from(responsePage);
+            return mapToPostResponse(post, author, false);
+        }).toList();
     }
 
-    public PageResponse<CommentResponse> getAllComments(Pageable pageable) {
-        Page<Comment> commentPage = commentRepository.findAll(pageable);
-        Page<CommentResponse> responsePage = commentPage.map(comment -> {
+    public List<CommentResponse> getAllComments() {
+        return commentRepository.findAll().stream().map(comment -> {
             User author = userRepository.findById(comment.getAuthorId()).orElse(null);
-            return CommentResponse.from(comment, author);
-        });
-        return PageResponse.from(responsePage);
+            return mapToCommentResponse(comment, author);
+        }).toList();
     }
 
     public PageResponse<UserResponse> getAllUsers(Pageable pageable) {
         Page<User> userPage = userRepository.findAll(pageable);
         Page<UserResponse> responsePage = userPage.map(UserResponse::from);
         return PageResponse.from(responsePage);
+    }
+
+    private PostResponse mapToPostResponse(Post post, User author, boolean likedByMe) {
+        String status = "ACTIVE";
+        if (post.isDeleted()) {
+            status = "DELETED";
+        } else if (post.getModerationStatus() == ModerationStatus.REMOVED) {
+            status = "HIDDEN";
+        }
+
+        String visibility = "COMPANY";
+        if (post.getVisibility() == Visibility.DRAFT) {
+            visibility = "PRIVATE";
+        } else if (post.getVisibility() == Visibility.DEPARTMENT) {
+            visibility = "DEPARTMENT";
+        }
+
+        AuthorSummary authorSummary = null;
+        if (author != null) {
+            authorSummary = AuthorSummary.builder()
+                    .id(author.getId())
+                    .fullName(author.getFullName())
+                    .jobTitle(author.getJobTitle())
+                    .department(author.getDepartment())
+                    .avatarUrl(author.getAvatarUrl())
+                    .build();
+        }
+
+        return PostResponse.builder()
+                .id(post.getId())
+                .author(authorSummary)
+                .content(post.getContent())
+                .mediaUrls(post.getMediaUrls())
+                .visibility(visibility)
+                .likeCount(post.getLikeCount())
+                .commentCount(post.getCommentCount())
+                .likedByMe(likedByMe)
+                .status(status)
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
+                .build();
+    }
+
+    private CommentResponse mapToCommentResponse(Comment comment, User author) {
+        String status = "ACTIVE";
+        if (comment.isDeleted()) {
+            status = "DELETED";
+        } else if (comment.getModerationStatus() == ModerationStatus.REMOVED) {
+            status = "HIDDEN";
+        }
+
+        AuthorSummary authorSummary = null;
+        if (author != null) {
+            authorSummary = AuthorSummary.builder()
+                    .id(author.getId())
+                    .fullName(author.getFullName())
+                    .jobTitle(author.getJobTitle())
+                    .department(author.getDepartment())
+                    .avatarUrl(author.getAvatarUrl())
+                    .build();
+        }
+
+        return CommentResponse.builder()
+                .id(comment.getId())
+                .postId(comment.getPostId())
+                .author(authorSummary)
+                .content(comment.getContent())
+                .status(status)
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .build();
     }
 }

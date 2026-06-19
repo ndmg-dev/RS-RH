@@ -1,49 +1,68 @@
 package com.mgca.socialnetwork.post.dto;
 
-import com.mgca.socialnetwork.common.ModerationStatus;
-import com.mgca.socialnetwork.common.Visibility;
-import com.mgca.socialnetwork.post.Post;
-import com.mgca.socialnetwork.user.User;
+import com.mgca.socialnetwork.common.dto.AuthorSummary;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PostResponse {
 
     private String id;
-    private String authorId;
-    private String authorName;
-    private String authorAvatarUrl;
+    private AuthorSummary author;
     private String content;
     private List<String> mediaUrls;
-    private Visibility visibility;
+    private String visibility;
     private int likeCount;
     private int commentCount;
-    private boolean likedByCurrentUser;
-    private ModerationStatus moderationStatus;
+    private boolean likedByMe;
+    private String status;
     private Instant createdAt;
     private Instant updatedAt;
 
-    /**
-     * Maps a Post entity + its author + a like-flag into a client-facing response.
-     */
-    public static PostResponse from(Post post, User author, boolean likedByCurrentUser) {
+    public static PostResponse from(com.mgca.socialnetwork.post.Post post, com.mgca.socialnetwork.user.User author, boolean likedByMe) {
+        String status = "ACTIVE";
+        if (post.isDeleted()) {
+            status = "DELETED";
+        } else if (post.getModerationStatus() == com.mgca.socialnetwork.common.ModerationStatus.REMOVED) {
+            status = "HIDDEN";
+        }
+
+        String visibility = "COMPANY";
+        if (post.getVisibility() == com.mgca.socialnetwork.common.Visibility.DRAFT) {
+            visibility = "PRIVATE";
+        } else if (post.getVisibility() == com.mgca.socialnetwork.common.Visibility.DEPARTMENT) {
+            visibility = "DEPARTMENT";
+        }
+
+        AuthorSummary authorSummary = null;
+        if (author != null) {
+            authorSummary = AuthorSummary.builder()
+                    .id(author.getId())
+                    .fullName(author.getFullName())
+                    .jobTitle(author.getJobTitle())
+                    .department(author.getDepartment())
+                    .avatarUrl(author.getAvatarUrl())
+                    .build();
+        }
+
         return PostResponse.builder()
                 .id(post.getId())
-                .authorId(post.getAuthorId())
-                .authorName(author != null ? author.getFullName() : null)
-                .authorAvatarUrl(author != null ? author.getAvatarUrl() : null)
+                .author(authorSummary)
                 .content(post.getContent())
                 .mediaUrls(post.getMediaUrls())
-                .visibility(post.getVisibility())
+                .visibility(visibility)
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
-                .likedByCurrentUser(likedByCurrentUser)
-                .moderationStatus(post.getModerationStatus())
+                .likedByMe(likedByMe)
+                .status(status)
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .build();

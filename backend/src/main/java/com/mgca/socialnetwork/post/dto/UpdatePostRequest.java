@@ -1,6 +1,5 @@
 package com.mgca.socialnetwork.post.dto;
 
-import com.mgca.socialnetwork.common.Visibility;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -14,5 +13,5 @@ public class UpdatePostRequest {
 
     private List<String> mediaUrls;
 
-    private Visibility visibility;
+    private String visibility;
 }

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../features/auth/useAuth";
 import { getFriendlyApiError } from "../utils/errors";
 import { Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
@@ -131,6 +131,13 @@ export const LoginPage: React.FC = () => {
               </button>
             </div>
           </form>
+
+          <div className="text-center pt-4">
+            <span className="text-sm text-slate-500 dark:text-slate-400">Novo por aqui? </span>
+            <Link to="/register" className="text-sm font-bold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+              Criar conta
+            </Link>
+          </div>
 
           {/* Quick Mock Logins for testing */}
           {import.meta.env.VITE_USE_MOCKS === "true" && (

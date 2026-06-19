@@ -6,6 +6,7 @@ import { AppShell } from "../components/layout/AppShell";
 
 // Pages
 import { LoginPage } from "../pages/LoginPage";
+import { RegisterPage } from "../pages/RegisterPage";
 import { FeedPage } from "../pages/FeedPage";
 import { ProfilePage } from "../pages/ProfilePage";
 import { EditProfilePage } from "../pages/EditProfilePage";
@@ -44,6 +45,15 @@ export const AppRouter: React.FC = () => {
           element={
             <PublicOnlyRoute>
               <LoginPage />
+            </PublicOnlyRoute>
+          }
+        />
+
+        <Route
+          path="/register"
+          element={
+            <PublicOnlyRoute>
+              <RegisterPage />
             </PublicOnlyRoute>
           }
         />

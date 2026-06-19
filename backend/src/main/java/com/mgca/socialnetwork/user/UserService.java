@@ -53,6 +53,9 @@ public class UserService {
         if (request.getLocation() != null) {
             user.setLocation(request.getLocation().trim());
         }
+        if (request.getTheme() != null) {
+            user.setTheme(request.getTheme().trim());
+        }
 
         user.setUpdatedAt(Instant.now());
         user = userRepository.save(user);
