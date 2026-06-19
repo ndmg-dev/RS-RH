@@ -15,4 +15,5 @@ public class UpdateProfileRequest {
     private List<String> skills;
     private String location;
     private String customSections;
+    private String theme;
 }

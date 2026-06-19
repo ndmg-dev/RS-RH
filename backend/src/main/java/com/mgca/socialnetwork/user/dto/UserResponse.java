@@ -22,6 +22,7 @@ public class UserResponse {
     private List<String> skills;
     private String location;
     private String customSections;
+    private String theme;
     private Instant createdAt;
 
     /**
@@ -40,6 +41,7 @@ public class UserResponse {
                 .skills(user.getSkills())
                 .location(user.getLocation())
                 .customSections(user.getCustomSections())
+                .theme(user.getTheme())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

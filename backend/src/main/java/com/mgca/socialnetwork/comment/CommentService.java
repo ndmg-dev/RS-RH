@@ -2,6 +2,7 @@ package com.mgca.socialnetwork.comment;
 
 import com.mgca.socialnetwork.common.ModerationStatus;
 import com.mgca.socialnetwork.common.dto.PageResponse;
+import com.mgca.socialnetwork.common.dto.AuthorSummary;
 import com.mgca.socialnetwork.common.exception.ForbiddenException;
 import com.mgca.socialnetwork.common.exception.ResourceNotFoundException;
 import com.mgca.socialnetwork.comment.dto.CommentResponse;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -56,10 +58,10 @@ public class CommentService {
         incrementCommentCount(postId, 1);
 
         User author = userRepository.findById(userId).orElse(null);
-        return CommentResponse.from(comment, author);
+        return mapToCommentResponse(comment, author);
     }
 
-    public PageResponse<CommentResponse> getCommentsByPost(String postId, Pageable pageable) {
+    public List<CommentResponse> getCommentsByPost(String postId, Pageable pageable) {
         Page<Comment> commentPage = commentRepository.findByPostIdAndDeletedFalse(postId, pageable);
 
         // Batch-fetch all distinct comment authors
@@ -71,12 +73,10 @@ public class CommentService {
         Map<String, User> authorMap = userRepository.findAllById(authorIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
-        Page<CommentResponse> responsePage = commentPage.map(comment -> {
+        return commentPage.getContent().stream().map(comment -> {
             User author = authorMap.get(comment.getAuthorId());
-            return CommentResponse.from(comment, author);
-        });
-
-        return PageResponse.from(responsePage);
+            return mapToCommentResponse(comment, author);
+        }).toList();
     }
 
     public CommentResponse updateComment(String commentId, String userId, UpdateCommentRequest request) {
@@ -93,7 +93,7 @@ public class CommentService {
         comment = commentRepository.save(comment);
 
         User author = userRepository.findById(userId).orElse(null);
-        return CommentResponse.from(comment, author);
+        return mapToCommentResponse(comment, author);
     }
 
     public void deleteComment(String commentId, String userId) {
@@ -120,5 +120,35 @@ public class CommentService {
                 Query.query(Criteria.where("id").is(postId)),
                 new Update().inc("commentCount", delta),
                 Post.class);
+    }
+
+    private CommentResponse mapToCommentResponse(Comment comment, User author) {
+        String status = "ACTIVE";
+        if (comment.isDeleted()) {
+            status = "DELETED";
+        } else if (comment.getModerationStatus() == ModerationStatus.REMOVED) {
+            status = "HIDDEN";
+        }
+
+        AuthorSummary authorSummary = null;
+        if (author != null) {
+            authorSummary = AuthorSummary.builder()
+                    .id(author.getId())
+                    .fullName(author.getFullName())
+                    .jobTitle(author.getJobTitle())
+                    .department(author.getDepartment())
+                    .avatarUrl(author.getAvatarUrl())
+                    .build();
+        }
+
+        return CommentResponse.builder()
+                .id(comment.getId())
+                .postId(comment.getPostId())
+                .author(authorSummary)
+                .content(comment.getContent())
+                .status(status)
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .build();
     }
 }

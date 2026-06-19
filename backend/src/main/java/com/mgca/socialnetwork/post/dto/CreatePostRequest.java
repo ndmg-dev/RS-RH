@@ -1,6 +1,5 @@
 package com.mgca.socialnetwork.post.dto;
 
-import com.mgca.socialnetwork.common.Visibility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -16,5 +15,5 @@ public class CreatePostRequest {
 
     private List<String> mediaUrls;
 
-    private Visibility visibility = Visibility.PUBLIC;
+    private String visibility = "COMPANY";
 }

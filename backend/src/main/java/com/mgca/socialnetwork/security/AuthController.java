@@ -45,11 +45,8 @@ public class AuthController {
 
     @GetMapping("/me")
     @Operation(summary = "Get the currently authenticated user's profile")
-    public ResponseEntity<UserResponse> me() {
-        String userId = getCurrentUserId();
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-        return ResponseEntity.ok(UserResponse.from(user));
+    public ResponseEntity<AuthResponse.AuthUserDto> me() {
+        return ResponseEntity.ok(authService.getMe(getCurrentUserId()));
     }
 
     // ── Helper ──────────────────────────────────────────────────────────────────

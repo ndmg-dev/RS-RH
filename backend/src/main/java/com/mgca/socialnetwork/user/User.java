@@ -64,6 +64,9 @@ public class User {
     @Builder.Default
     private boolean active = true;
 
+    @Builder.Default
+    private String theme = "LIGHT";
+
     @CreatedDate
     @Indexed
     private Instant createdAt;

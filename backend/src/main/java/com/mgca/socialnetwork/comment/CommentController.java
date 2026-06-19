@@ -4,6 +4,7 @@ import com.mgca.socialnetwork.comment.dto.CommentResponse;
 import com.mgca.socialnetwork.comment.dto.CreateCommentRequest;
 import com.mgca.socialnetwork.comment.dto.UpdateCommentRequest;
 import com.mgca.socialnetwork.common.dto.PageResponse;
+import java.util.List;
 import com.mgca.socialnetwork.security.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,7 +42,7 @@ public class CommentController {
 
     @GetMapping("/api/v1/posts/{postId}/comments")
     @Operation(summary = "List comments for a post")
-    public ResponseEntity<PageResponse<CommentResponse>> getComments(
+    public ResponseEntity<List<CommentResponse>> getComments(
             @PathVariable String postId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

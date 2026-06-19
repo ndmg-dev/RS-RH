@@ -67,6 +67,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return loggedUser;
   };
 
+  const register = async (data: any) => {
+    const loggedUser = await authService.register(data);
+    setUser(loggedUser);
+    return loggedUser;
+  };
+
   const logout = async () => {
     await authService.logout();
     setUser(null);
@@ -77,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -58,6 +58,32 @@ export const authService = {
     }
   },
 
+  async register(data: { fullName: string; email: string; password: string; department: string; jobTitle: string; }): Promise<AuthUser> {
+    if (USE_MOCKS) {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      if (!data.email.endsWith("@mendoncagalvao.com.br")) {
+        throw new Error("Apenas e-mails corporativos são permitidos.");
+      }
+      const authUser: AuthUser = {
+        id: "mock-new-id-" + Date.now(),
+        fullName: data.fullName,
+        email: data.email,
+        role: "USER",
+        jobTitle: data.jobTitle,
+        department: data.department
+      };
+      authStorage.setToken("fake-jwt-token-for-new");
+      authStorage.setUser(authUser);
+      return authUser;
+    } else {
+      const response = await api.post<{ token: string; user: AuthUser }>("/auth/register", data);
+      const { token, user } = response.data;
+      authStorage.setToken(token);
+      authStorage.setUser(user);
+      return user;
+    }
+  },
+
   async logout(): Promise<void> {
     if (USE_MOCKS) {
       authStorage.clearAll();
