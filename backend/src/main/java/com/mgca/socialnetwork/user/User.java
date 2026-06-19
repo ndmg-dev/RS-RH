@@ -53,6 +53,8 @@ public class User {
 
     private String avatarUrl;
 
+    private String bannerUrl;
+
     @Builder.Default
     private List<String> skills = new ArrayList<>();
 

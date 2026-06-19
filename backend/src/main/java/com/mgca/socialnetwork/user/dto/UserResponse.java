@@ -19,6 +19,7 @@ public class UserResponse {
     private String department;
     private String bio;
     private String avatarUrl;
+    private String bannerUrl;
     private List<String> skills;
     private String location;
     private String customSections;
@@ -38,6 +39,7 @@ public class UserResponse {
                 .department(user.getDepartment())
                 .bio(user.getBio())
                 .avatarUrl(user.getAvatarUrl())
+                .bannerUrl(user.getBannerUrl())
                 .skills(user.getSkills())
                 .location(user.getLocation())
                 .customSections(user.getCustomSections())
