@@ -56,6 +56,10 @@ public class UserService {
         if (request.getTheme() != null) {
             user.setTheme(request.getTheme().trim());
         }
+        if (request.getCustomSections() != null) {
+            user.setCustomSections(request.getCustomSections());
+        }
+        }
 
         user.setUpdatedAt(Instant.now());
         user = userRepository.save(user);

@@ -1,5 +1,21 @@
 export type Role = "USER" | "ADMIN" | "MODERATOR";
 
+export type CustomSectionItem = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  startDate?: string;
+  endDate?: string;
+  description?: string;
+  link?: string;
+};
+
+export type CustomSection = {
+  type: "education" | "experience" | "certificate" | "project" | "recommendation" | "custom";
+  title: string;
+  items: CustomSectionItem[];
+};
+
 export type AuthUser = {
   id: string;
   fullName: string;
@@ -9,6 +25,7 @@ export type AuthUser = {
   department?: string;
   avatarUrl?: string;
   theme?: "LIGHT" | "DARK";
+  customSections?: string;
 };
 
 export type UserProfile = {
@@ -23,6 +40,7 @@ export type UserProfile = {
   skills?: string[];
   location?: string;
   theme?: "LIGHT" | "DARK";
+  customSections?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -68,4 +86,12 @@ export type PaginatedResponse<T> = {
   size: number;
   totalItems: number;
   totalPages: number;
+};
+
+export type Announcement = {
+  id: string;
+  title: string;
+  content: string;
+  type: "EVENT" | "DOCUMENT" | "GENERAL";
+  createdAt: string;
 };

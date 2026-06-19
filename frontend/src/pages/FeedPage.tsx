@@ -57,8 +57,8 @@ export const FeedPage: React.FC = () => {
     };
   }, [fetchFeed]);
 
-  const handleCreatePost = async (content: string, visibility: "COMPANY" | "DEPARTMENT" | "PRIVATE") => {
-    const newPost = await postsService.createPost(content, [], visibility);
+  const handleCreatePost = async (content: string, mediaUrls: string[], visibility: "COMPANY" | "DEPARTMENT" | "PRIVATE") => {
+    const newPost = await postsService.createPost(content, mediaUrls, visibility);
     setPosts(prev => [newPost, ...prev]);
   };
 

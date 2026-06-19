@@ -4,6 +4,7 @@ export const mockPosts: Post[] = [
   {
     id: "post-1",
     content: "Atenção equipe! O prazo final para entrega do SPED Fiscal referente ao mês anterior é no dia 20. Por favor, revisem os lotes de notas fiscais de entrada e saída pendentes no sistema até amanhã para evitarmos correria e possíveis inconsistências. Se precisarem de apoio com alguma conciliação de ICMS, o time fiscal está à disposição!",
+    mediaUrls: ["https://picsum.photos/800/600?random=1"],
     author: {
       id: "user-4",
       fullName: "Fernanda Lima",
@@ -22,6 +23,10 @@ export const mockPosts: Post[] = [
   {
     id: "post-2",
     content: "Dica de produtividade contábil 📊: Ao iniciar o fechamento dos balancetes mensais, comecem sempre pela conferência dos saldos de caixa e bancos em relação aos extratos físicos. Identificar divergências de conciliação bancária logo no início economiza horas de investigação no final do processo. Fica a dica!",
+    mediaUrls: [
+      "https://picsum.photos/800/600?random=2",
+      "https://picsum.photos/800/600?random=3"
+    ],
     author: {
       id: "user-3",
       fullName: "Roberto Santos",
@@ -40,6 +45,11 @@ export const mockPosts: Post[] = [
   {
     id: "post-3",
     content: "Olá pessoal! Passando para lembrar que no próximo dia 25 teremos nosso treinamento interno mensal. O tema deste mês será 'Comunicação Intersetorial Eficiente e Alinhamento de Processos'. O link para a videochamada já está nos convites do calendário de todos. Contamos com a participação ativa de cada setor!",
+    mediaUrls: [
+      "https://picsum.photos/800/600?random=4",
+      "https://picsum.photos/800/600?random=5",
+      "https://picsum.photos/800/600?random=6"
+    ],
     author: {
       id: "user-2",
       fullName: "Mariana Silva",
@@ -58,6 +68,13 @@ export const mockPosts: Post[] = [
   {
     id: "post-4",
     content: "⚠️ ALERTA DE SEGURANÇA (TI): Identificamos uma campanha ativa de phishing por e-mail se passando por atualizações do eSocial. Lembrem-se: a equipe de TI ou o próprio eSocial nunca solicita redefinição de senhas nem download de anexos executáveis (.exe, .zip) por links externos não oficiais. Em caso de dúvida, não cliquem e entrem em contato conosco imediatamente.",
+    mediaUrls: [
+      "https://picsum.photos/800/600?random=7",
+      "https://picsum.photos/800/600?random=8",
+      "https://picsum.photos/800/600?random=9",
+      "https://picsum.photos/800/600?random=10",
+      "https://picsum.photos/800/600?random=11"
+    ],
     author: {
       id: "user-1",
       fullName: "Eduardo Melo",
