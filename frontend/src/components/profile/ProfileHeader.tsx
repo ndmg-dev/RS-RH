@@ -15,7 +15,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, currentUs
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm transition-colors duration-300">
       {/* Banner */}
-      <div className="h-32 sm:h-48 bg-gradient-to-r from-blue-600 to-indigo-800 relative"></div>
+      <div 
+        className="h-32 sm:h-48 bg-gradient-to-r from-blue-600 to-indigo-800 relative bg-cover bg-center"
+        style={profile.bannerUrl ? { backgroundImage: `url(${profile.bannerUrl})` } : {}}
+      ></div>
 
       {/* Avatar & Action Button Area */}
       <div className="px-6 pb-6 relative">

@@ -24,6 +24,16 @@ const profileSchema = z.object({
       return false;
     }
   }, { message: "Insira uma URL válida para o avatar ou deixe em branco." }).optional(),
+  bannerUrl: z.string().refine(val => {
+    if (!val) return true;
+    if (val.startsWith("data:image/")) return true;
+    try {
+      new URL(val);
+      return true;
+    } catch {
+      return false;
+    }
+  }, { message: "Insira uma URL válida para a capa ou deixe em branco." }).optional(),
   skillsInput: z.string().optional(),
   theme: z.enum(["LIGHT", "DARK"]),
 });
@@ -36,6 +46,7 @@ export const EditProfilePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isReadingAvatar, setIsReadingAvatar] = useState(false);
+  const [isReadingBanner, setIsReadingBanner] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -53,12 +64,14 @@ export const EditProfilePage: React.FC = () => {
       location: "",
       bio: "",
       avatarUrl: "",
+      bannerUrl: "",
       skillsInput: "",
       theme: "LIGHT",
     }
   });
 
   const watchAvatarUrl = watch("avatarUrl");
+  const watchBannerUrl = watch("bannerUrl");
   const watchFullName = watch("fullName");
 
   const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,6 +104,36 @@ export const EditProfilePage: React.FC = () => {
     e.target.value = "";
   };
 
+  const handleBannerFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    if (!file.type.startsWith("image/")) {
+      setError("Apenas arquivos de imagem são permitidos.");
+      return;
+    }
+
+    setIsReadingBanner(true);
+    setError(null);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setValue("bannerUrl", event.target.result as string, { shouldValidate: true, shouldDirty: true });
+      } else {
+        setError("Erro ao ler imagem da capa.");
+      }
+      setIsReadingBanner(false);
+    };
+    reader.onerror = () => {
+      setError("Erro ao carregar o arquivo da capa.");
+      setIsReadingBanner(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   const loadProfile = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -101,6 +144,7 @@ export const EditProfilePage: React.FC = () => {
       setValue("location", data.location || "");
       setValue("bio", data.bio || "");
       setValue("avatarUrl", data.avatarUrl || "");
+      setValue("bannerUrl", data.bannerUrl || "");
       setValue("skillsInput", data.skills ? data.skills.join(", ") : "");
       setValue("theme", data.theme || "LIGHT");
       setError(null);
@@ -145,6 +189,7 @@ export const EditProfilePage: React.FC = () => {
         location: values.location,
         bio: values.bio,
         avatarUrl: values.avatarUrl,
+        bannerUrl: values.bannerUrl,
         skills,
         theme: values.theme,
       });
@@ -192,6 +237,36 @@ export const EditProfilePage: React.FC = () => {
                 {error}
               </div>
             )}
+
+            {/* Banner Upload Widget */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800/60 transition-colors duration-300">
+              <div className="flex-1 mr-4">
+                <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 block mb-1">Capa do Perfil (Banner)</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 block mb-3">Recomendado: imagem horizontal com boa resolução.</span>
+                <div className="flex items-center space-x-2">
+                  <label className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-full transition-colors cursor-pointer flex items-center space-x-1.5 shadow-sm">
+                    {isReadingBanner ? <Loader2 size={12} className="animate-spin text-white" /> : <Image size={12} />}
+                    <span>Alterar Capa</span>
+                    <input type="file" accept="image/*" onChange={handleBannerFileChange} className="hidden" disabled={isReadingBanner} />
+                  </label>
+                  {watchBannerUrl && (
+                    <button type="button" onClick={() => setValue("bannerUrl", "")} className="px-3 py-1.5 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-full transition-colors cursor-pointer">
+                      Remover
+                    </button>
+                  )}
+                </div>
+                <input type="hidden" {...register("bannerUrl")} />
+              </div>
+              <div className="mt-4 sm:mt-0 w-full sm:w-48 h-24 rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm relative">
+                {watchBannerUrl ? (
+                  <img src={watchBannerUrl} alt="Capa" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-r from-blue-600 to-indigo-800 flex items-center justify-center">
+                    <span className="text-white/50 text-xs font-semibold">Sem capa</span>
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Avatar Upload Widget */}
             <div className="flex flex-col items-center sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800/60 transition-colors duration-300">
