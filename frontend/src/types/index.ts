@@ -24,6 +24,7 @@ export type AuthUser = {
   jobTitle?: string;
   department?: string;
   avatarUrl?: string;
+  bannerUrl?: string;
   theme?: "LIGHT" | "DARK";
   customSections?: string;
 };
@@ -37,6 +38,7 @@ export type UserProfile = {
   department?: string;
   bio?: string;
   avatarUrl?: string;
+  bannerUrl?: string;
   skills?: string[];
   location?: string;
   theme?: "LIGHT" | "DARK";
