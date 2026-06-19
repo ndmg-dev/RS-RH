@@ -12,6 +12,7 @@ public class UpdateProfileRequest {
     private String department;
     private String bio;
     private String avatarUrl;
+    private String bannerUrl;
     private List<String> skills;
     private String location;
     private String customSections;

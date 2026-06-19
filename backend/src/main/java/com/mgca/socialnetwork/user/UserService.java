@@ -47,6 +47,9 @@ public class UserService {
         if (request.getAvatarUrl() != null) {
             user.setAvatarUrl(request.getAvatarUrl().trim());
         }
+        if (request.getBannerUrl() != null) {
+            user.setBannerUrl(request.getBannerUrl().trim());
+        }
         if (request.getSkills() != null) {
             user.setSkills(request.getSkills());
         }
