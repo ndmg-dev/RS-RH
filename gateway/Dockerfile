@@ -2,6 +2,7 @@
 FROM node:20-alpine AS build
 
 WORKDIR /app
+ENV DATABASE_URL="mongodb://localhost:27017/dummy"
 
 # Copy dependency descriptors
 COPY package.json package-lock.json* ./
@@ -30,9 +31,9 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
 
-# Copy Prisma schema and generate client for production
-COPY prisma ./prisma
-RUN npx prisma generate
+# Copy generated Prisma Client from build stage
+COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
 # Copy compiled JavaScript from build stage
 COPY --from=build /app/dist ./dist
